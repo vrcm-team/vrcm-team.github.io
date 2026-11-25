@@ -1,0 +1,16 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["YZ73QQ6N2X.io.github.vrcmteam.vrcm"],
+        "components": [
+          { "/": "/home/user/*" },
+          { "/": "/home/world/*" },
+          { "/": "/home/group/*" },
+          { "/": "/home/avatar/*" },
+          { "/": "/home/launch" }
+        ]
+      }
+    ]
+  }
+}

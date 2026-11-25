@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "io.github.vrcmteam.vrcm",
+      "sha256_cert_fingerprints": [
+        "6F:7D:B5:5D:31:9A:E6:48:7E:F6:9C:82:C6:76:E9:2B:BF:1E:91:C1:70:AF:A3:68:FB:E9:E2:CB:8D:3F:F1:2B"
+      ]
+    }
+  }
+]

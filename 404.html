@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>VRCM</title>
+<script>
+  // VRCM share links mirror vrchat.com paths. When the app is installed with verified App Links /
+  // Universal Links, the system opens it before this page loads.
+  // - Not iOS: redirect straight to VRChat.
+  // - iOS: sideloaded builds can only be opened through the vrcm:// scheme, and a page cannot tell
+  //   whether that scheme is installed, so show both choices instead of redirecting.
+  (function () {
+    var path = location.pathname;
+    var isContent = /^\/home\/(user|world|group|avatar)\/[A-Za-z0-9_-]+\/?$/.test(path) ||
+      path === "/home/launch" || path === "/home/launch/";
+    window.vrcmIsContent = isContent;
+    if (!isContent) return;
+    var rest = path + location.search + location.hash;
+    // iPadOS Safari reports a Mac user agent; touch support tells it apart from a real Mac.
+    var ua = navigator.userAgent;
+    var isIos = /iPad|iPhone|iPod/.test(ua) ||
+      (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    if (!isIos) {
+      location.replace("https://vrchat.com" + rest);
+      return;
+    }
+    window.vrcmLinks = { app: "vrcm://" + location.host + rest, web: "https://vrchat.com" + rest };
+  })();
+</script>
+<style>
+  :root { --bg: #f2f2f7; --card: #fff; --label: #1c1c1e; --secondary: #6e6e73; --accent: #007aff; --fill: #e5e5ea; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #000; --card: #1c1c1e; --label: #f2f2f7; --secondary: #98989f; --accent: #0a84ff; --fill: #2c2c2e; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
+         font: 17px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: var(--bg); color: var(--label); }
+  main { width: 100%; max-width: 360px; background: var(--card); border-radius: 20px; padding: 24px; text-align: center; }
+  h1 { font-size: 22px; margin: 0 0 8px; }
+  p { margin: 0 0 20px; color: var(--secondary); font-size: 15px; }
+  a.button { display: block; padding: 14px; border-radius: 12px; text-decoration: none; font-weight: 600; }
+  a.primary { background: var(--accent); color: #fff; margin-bottom: 12px; }
+  a.secondary { background: var(--fill); color: var(--accent); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+  <main id="choice" hidden>
+    <h1 data-t="title"></h1>
+    <p data-t="hint"></p>
+    <a class="button primary" id="open-app" data-t="app"></a>
+    <a class="button secondary" id="open-web" data-t="web"></a>
+  </main>
+  <main id="missing" hidden>
+    <h1 data-t="missing"></h1>
+    <a class="button secondary" href="/VRCM/">VRCM</a>
+  </main>
+<script>
+  (function () {
+    var texts = {
+      en: { title: "Open in VRCM", hint: "If VRCM isn't installed, view this page on the VRChat website.",
+            app: "Open in VRCM", web: "Go to VRChat website", missing: "Page not found" },
+      "zh-Hans": { title: "在 VRCM 中打开", hint: "如果没有安装 VRCM，可以在 VRChat 网站上查看。",
+            app: "在 VRCM 中打开", web: "前往 VRChat 网站", missing: "页面不存在" },
+      "zh-Hant": { title: "在 VRCM 中開啟", hint: "如果沒有安裝 VRCM，可以在 VRChat 網站上查看。",
+            app: "在 VRCM 中開啟", web: "前往 VRChat 網站", missing: "頁面不存在" },
+      ja: { title: "VRCM で開く", hint: "VRCM がインストールされていない場合は、VRChat のウェブサイトで表示できます。",
+            app: "VRCM で開く", web: "VRChat ウェブサイトへ", missing: "ページが見つかりません" }
+    };
+    var lang = (navigator.language || "en").toLowerCase();
+    var key = lang.indexOf("zh") === 0
+      ? (/hant|tw|hk|mo/.test(lang) ? "zh-Hant" : "zh-Hans")
+      : (lang.indexOf("ja") === 0 ? "ja" : "en");
+    var t = texts[key];
+    document.documentElement.lang = key;
+    document.querySelectorAll("[data-t]").forEach(function (el) { el.textContent = t[el.dataset.t]; });
+    var links = window.vrcmLinks;
+    if (links) {
+      document.getElementById("open-app").href = links.app;
+      document.getElementById("open-web").href = links.web;
+      document.getElementById("choice").hidden = false;
+    } else if (!window.vrcmIsContent) {
+      document.getElementById("missing").hidden = false;
+    }
+  })();
+</script>
+</body>
+</html>
