@@ -6,27 +6,37 @@
 <meta name="robots" content="noindex">
 <title>VRCM</title>
 <script>
-  // VRCM share links mirror vrchat.com paths. When the app is installed with verified App Links /
-  // Universal Links, the system opens it before this page loads.
-  // - Not iOS: redirect straight to VRChat.
-  // - iOS: sideloaded builds can only be opened through the vrcm:// scheme, and a page cannot tell
-  //   whether that scheme is installed, so show both choices instead of redirecting.
+  // VRCM share links mirror vrchat.com paths. A link tapped in another app is handed to VRCM by
+  // App Links / Universal Links before this page loads. This page shows up when that does not
+  // happen: the URL was typed or pasted into the address bar, the domain is not verified for the
+  // installed build (sideloaded iOS, debug), or the app is missing.
+  // - iOS / Android: a page cannot tell whether VRCM is installed, so offer both choices.
+  //   The app button uses the vrcm:// scheme, which needs no domain verification.
+  // - Other platforms have no VRCM to open: redirect straight to VRChat.
   (function () {
+    var host = "vrcm-team.github.io";
     var path = location.pathname;
     var isContent = /^\/home\/(user|world|group|avatar)\/[A-Za-z0-9_-]+\/?$/.test(path) ||
       path === "/home/launch" || path === "/home/launch/";
     window.vrcmIsContent = isContent;
     if (!isContent) return;
-    var rest = path + location.search + location.hash;
-    // iPadOS Safari reports a Mac user agent; touch support tells it apart from a real Mac.
+    var rest = path + location.search;
+    var web = "https://vrchat.com" + rest;
     var ua = navigator.userAgent;
-    var isIos = /iPad|iPhone|iPod/.test(ua) ||
-      (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-    if (!isIos) {
-      location.replace("https://vrchat.com" + rest);
+    var isAndroid = /Android/.test(ua);
+    // iPadOS Safari reports a Mac user agent; touch support tells it apart from a real Mac.
+    var isIos = !isAndroid && (/iPad|iPhone|iPod/.test(ua) ||
+      (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1));
+    if (!isIos && !isAndroid) {
+      location.replace(web);
       return;
     }
-    window.vrcmLinks = { app: "vrcm://" + location.host + rest, web: "https://vrchat.com" + rest };
+    // Android browsers open intent:// URLs; without VRCM, Chrome follows browser_fallback_url.
+    var app = isAndroid
+      ? "intent://" + host + rest + "#Intent;scheme=vrcm;action=android.intent.action.VIEW;" +
+        "category=android.intent.category.BROWSABLE;S.browser_fallback_url=" + encodeURIComponent(web) + ";end"
+      : "vrcm://" + host + rest;
+    window.vrcmLinks = { app: app, web: web };
   })();
 </script>
 <style>
